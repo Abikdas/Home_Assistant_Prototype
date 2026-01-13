@@ -1,0 +1,62 @@
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+
+const char* ssid = "Nothing 3a";
+const char* password = "123456780";
+
+ESP8266WebServer server(80);
+
+// LED pins
+int leds[5] = {5, 4, 14, 12, 13}; // D1, D2, D5, D6, D7
+
+String webpage() { // HTML goes to the 15th line
+  return R"rawliteral(
+<!DOCTYPE html>
+
+)rawliteral";
+}
+
+
+
+void setup() {
+  Serial.begin(115200);
+
+  for (int i = 0; i < 5; i++) {
+    pinMode(leds[i], OUTPUT);
+    digitalWrite(leds[i], LOW);
+  }
+
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting");
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("\nConnected!");
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
+
+  server.on("/", []() {
+    server.send(200, "text/html", webpage());
+  });
+
+  server.on("/on", []() {
+    int led = server.arg("led").toInt();
+    digitalWrite(leds[led], HIGH);
+    server.send(200, "text/plain", "ON");
+  });
+
+  server.on("/off", []() {
+    int led = server.arg("led").toInt();
+    digitalWrite(leds[led], LOW);
+    server.send(200, "text/plain", "OFF");
+  });
+
+  server.begin();
+}
+
+void loop() {
+  server.handleClient();
+}

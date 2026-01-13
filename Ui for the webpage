@@ -1,0 +1,600 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desk Control</title>
+
+<style>
+:root {
+  --bg: #0a0e27;
+  --card: #141829;
+  --accent: #6366f1;
+  --accent-glow: rgba(99, 102, 241, 0.3);
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --border: rgba(148, 163, 184, 0.1);
+  --success: #10b981;
+  --danger: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.shutdown {
+  background: #000000;
+  filter: blur(0px);
+}
+
+body::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
+  animation: pulse 8s ease-in-out infinite;
+  transition: opacity 0.6s;
+}
+
+body.shutdown::before {
+  opacity: 0;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.1); opacity: 0.5; }
+}
+
+.container {
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  z-index: 1;
+  animation: slideUp 0.6s ease-out;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.shutdown .container {
+  filter: blur(0px);
+  opacity: 1;
+  transform: scale(1);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+h1 {
+  text-align: center;
+  font-weight: 600;
+  font-size: 28px;
+  margin-bottom: 24px;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  position: relative;
+  animation: fadeIn 0.8s ease-out 0.2s both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+h1::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  border-radius: 2px;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  animation: fadeIn 0.8s ease-out 0.3s both;
+}
+
+.mode-btn {
+  flex: 1;
+  padding: 14px 20px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.mode-btn::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.mode-btn:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+.mode-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.mode-btn.session {
+  background: linear-gradient(135deg, var(--accent), #7c3aed);
+  border-color: transparent;
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.mode-btn.session:hover {
+  box-shadow: 0 0 30px var(--accent-glow), 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.mode-btn.session.active {
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+}
+
+.mode-btn.shutdown-btn {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.mode-btn.shutdown-btn:hover {
+  border-color: var(--danger);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+}
+
+.mode-btn.shutdown-btn.active {
+  background: linear-gradient(135deg, var(--danger), #dc2626);
+  border-color: transparent;
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
+  animation: shutdownPulse 2s infinite;
+}
+
+@keyframes shutdownPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
+  50% { box-shadow: 0 0 40px rgba(239, 68, 68, 0.6); }
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 0;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: cardSlide 0.5s ease-out backwards;
+  animation-delay: calc(var(--index) * 0.08s + 0.4s);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+@keyframes cardSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  transition: left 0.5s;
+}
+
+.card:hover::before {
+  left: 100%;
+}
+
+.card:hover {
+  border-color: rgba(148, 163, 184, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.card:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.card.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(124, 58, 237, 0.15));
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.card.active::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.label-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  flex: 1;
+  position: relative;
+  z-index: 2;
+}
+
+.icon {
+  width: 36px;
+  height: 36px;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.card.active .icon {
+  background: rgba(99, 102, 241, 0.2);
+  animation: iconBounce 0.5s ease-out;
+}
+
+@keyframes iconBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2) rotate(10deg); }
+}
+
+.card:hover .icon {
+  transform: scale(1.05);
+}
+
+.label-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.label {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.2px;
+  transition: all 0.3s;
+}
+
+.card.active .label {
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+.label-sub {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 400;
+  transition: all 0.3s;
+}
+
+.card.active .label-sub {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  background: var(--muted);
+  border-radius: 50%;
+  margin-right: 24px;
+  opacity: 0.3;
+  transition: all 0.4s;
+  position: relative;
+  z-index: 2;
+}
+
+.card.active .status-indicator {
+  opacity: 1;
+  background: var(--success);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.8), 0 0 24px rgba(16, 185, 129, 0.4);
+  animation: blink 2s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.9); }
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0);
+  animation: rippleEffect 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes rippleEffect {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    max-width: 100%;
+  }
+  
+  h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .control-buttons {
+    flex-direction: column;
+  }
+  
+  .label-wrapper {
+    padding: 18px 20px;
+  }
+  
+  .icon {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>Desk Control</h1>
+
+  <div class="control-buttons">
+    <button class="mode-btn session" onclick="sessionMode()">
+      ⚡ Session Mode
+    </button>
+    <button class="mode-btn shutdown-btn" onclick="shutdownMode()">
+      🌙 Shutdown
+    </button>
+  </div>
+
+  <div class="card" style="--index: 0" onclick="toggleCard(0, this)">
+    <div class="label-wrapper">
+      <div class="icon">💡</div>
+      <div class="label-content">
+        <div class="label">Primary Light</div>
+        <div class="label-sub">LED 1</div>
+      </div>
+    </div>
+    <div class="status-indicator"></div>
+  </div>
+
+  <div class="card" style="--index: 1" onclick="toggleCard(1, this)">
+    <div class="label-wrapper">
+      <div class="icon">🔆</div>
+      <div class="label-content">
+        <div class="label">Accent Light</div>
+        <div class="label-sub">LED 2</div>
+      </div>
+    </div>
+    <div class="status-indicator"></div>
+  </div>
+
+  <div class="card" style="--index: 2" onclick="toggleCard(2, this)">
+    <div class="label-wrapper">
+      <div class="icon">✨</div>
+      <div class="label-content">
+        <div class="label">Ambient Light</div>
+        <div class="label-sub">LED 3</div>
+      </div>
+    </div>
+    <div class="status-indicator"></div>
+  </div>
+
+  <div class="card" style="--index: 3" onclick="toggleCard(3, this)">
+    <div class="label-wrapper">
+      <div class="icon">🌙</div>
+      <div class="label-content">
+        <div class="label">Night Light</div>
+        <div class="label-sub">LED 4</div>
+      </div>
+    </div>
+    <div class="status-indicator"></div>
+  </div>
+
+  <div class="card" style="--index: 4" onclick="toggleCard(4, this)">
+    <div class="label-wrapper">
+      <div class="icon">⚡</div>
+      <div class="label-content">
+        <div class="label">Power Strip</div>
+        <div class="label-sub">LED 5</div>
+      </div>
+    </div>
+    <div class="status-indicator"></div>
+  </div>
+</div>
+
+<script>
+let isShutdown = false;
+let isSessionActive = false;
+
+function createRipple(event, element) {
+  const ripple = document.createElement('span');
+  ripple.classList.add('ripple');
+  
+  const rect = element.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  const x = event.clientX - rect.left - size / 2;
+  const y = event.clientY - rect.top - size / 2;
+  
+  ripple.style.width = ripple.style.height = size + 'px';
+  ripple.style.left = x + 'px';
+  ripple.style.top = y + 'px';
+  
+  element.appendChild(ripple);
+  
+  setTimeout(() => ripple.remove(), 600);
+}
+
+function toggleCard(num, el) {
+  if (isShutdown) return;
+  
+  createRipple(event, el);
+  el.classList.toggle("active");
+  
+  let state = el.classList.contains("active") ? "on" : "off";
+  fetch("/" + state + "?led=" + num);
+}
+
+function sessionMode() {
+  if (isShutdown) return;
+  
+  isSessionActive = !isSessionActive;
+  const cards = document.querySelectorAll('.card');
+  const sessionBtn = document.querySelector('.session');
+  
+  sessionBtn.classList.toggle('active');
+  
+  if (isSessionActive) {
+    // Turn all lights ON
+    cards.forEach((card, index) => {
+      setTimeout(() => {
+        if (!card.classList.contains('active')) {
+          card.classList.add('active');
+          fetch("/on?led=" + index);
+        }
+      }, index * 100);
+    });
+  } else {
+    // Turn all lights OFF
+    cards.forEach((card, index) => {
+      setTimeout(() => {
+        if (card.classList.contains('active')) {
+          card.classList.remove('active');
+          fetch("/off?led=" + index);
+        }
+      }, index * 100);
+    });
+  }
+}
+
+function shutdownMode() {
+  isShutdown = !isShutdown;
+  const body = document.body;
+  const cards = document.querySelectorAll('.card');
+  const shutdownBtn = document.querySelector('.shutdown-btn');
+  const sessionBtn = document.querySelector('.session');
+  const cardsContainer = document.querySelectorAll('.card');
+  
+  shutdownBtn.classList.toggle('active');
+  body.classList.toggle('shutdown');
+  
+  // Hide/show session button and cards
+  if (isShutdown) {
+    sessionBtn.style.display = 'none';
+    cardsContainer.forEach(card => card.style.display = 'none');
+    
+    // Turn off all lights
+    cards.forEach((card, index) => {
+      setTimeout(() => {
+        if (card.classList.contains('active')) {
+          card.classList.remove('active');
+          fetch("/off?led=" + index);
+        }
+      }, index * 80);
+    });
+    
+    // Reset session mode state
+    isSessionActive = false;
+    sessionBtn.classList.remove('active');
+  } else {
+    sessionBtn.style.display = '';
+    cardsContainer.forEach(card => card.style.display = '');
+  }
+}
+
+// Add click ripple effect to all interactive elements
+document.addEventListener('click', function(e) {
+  if (e.target.closest('.mode-btn')) {
+    createRipple(e, e.target.closest('.mode-btn'));
+  }
+});
+</script>
+</body>
+</html>
