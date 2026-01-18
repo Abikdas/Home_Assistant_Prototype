@@ -7,7 +7,7 @@ Its a home assistant prototype for automation of my room light access via a web 
 3. Aesthetic led setup control for my desktop
 
 # Components_used
-1. Ardiono based esp8266 wifi board
+1. Arduino based esp8266 wifi board
 2. Relay 5v
 3. Pcb (universal)
 4. wires
